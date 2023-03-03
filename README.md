@@ -43,3 +43,4 @@ N 및 P 변환, 토양 pH, 침식 및 모든 범위의 관리 제어 가능.
 
 <br>
 
+[--더보기 more information--](https://ethanseok.github.io/2023-03-01/crop_model1-post)
