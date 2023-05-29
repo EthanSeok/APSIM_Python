@@ -1,25 +1,6 @@
-## 작물 모델
-* ***작물모델 혹은 작물생육모델이라 함은 식물, 토양, 기상 등으로 짜인 작물생태계의 물질과 에너지 흐름에 대한 물리, 화학, 생물학적 기초지식을 토대로 그 관계를 수학적으로 
-나타낸 것이라 할 수 있다. 이 것이 시공간적으로 적절한 입력자료에 의해 구동되면, 과학영농을 위한 의사지원정보를 생산할수 있다. 선진국에서는 이미 30~40년 전부터 이 분야의
-연구 및 교육이 시작되어 지금은 작황 예측, 공장형 농업 등에 실용화되었음은 물론, 기후변화에 대응한 미래 농업 영향 예측 및 적응을 위한 유망기술로 주목받고 있다. 
-하지만 국내에서는 학제 간 소통의 미흡과 전문가 부족으로 본격적인 연구와 체계적인 교육이 이루어지지 못한 실제이다.  
--작물생육 모델링의 이론과 실제 중-***
-
-
-* 작물모델은 기본적으로 생육 환경 조건이 입력자료로 사용되며, 생산량을 기본으로 부가적인 정보를 출력자료로 얻을 수 있으며, 입력자료의 형식은 모델마다 약간의 차이가 있다.
-
-
-* 현 시점 상용화 된 작물모델의 종류는 무수히 많으며, 각각의 모델은 모두 자세하게 설명하는 기작의 종류가 다르다. 예를 들어 AquaCrop의 경우 토양 수분에 관한 기작을 자세히 
-설명하는가 하면, DNDC의 경우 작물의 N 및 CO2 사용과 관련한 기작을 보다 자세히 설명한다.***
-
-<br>
-
 모델링 - 참조 글
 * [모델링 - 여러가지 작물생육 모델 돌려보기 -1부](https://ethanseok.github.io/2023-03-01/crop_model1-post)
 * [모델링 - 여러가지 작물생육 모델 돌려보기 -2부](https://ethanseok.github.io/2023-03-02/crop_model2-post)
-
-
-<br>
 
 <br>
 
@@ -47,3 +28,81 @@ N 및 P 변환, 토양 pH, 침식 및 모든 범위의 관리 제어 가능.
 
 <br>
 
+## APSIM Python
+
+**본 APSIM Python은 기존 GUI 인터페이스의 APSIM에서 사이트 별로 모두 별도로 돌려야 했던 단점을 커버함과 동시에 캘리브레이션을 효율적으로 하기 위한 목적으로 개발되었다.**
+
+### 설치 및 사용 방법
+
+[여기에서 설치](https://drive.google.com/file/d/1umtgLz-Ka9PkoTwLDwIsJBmdkmGTe1tT/view?usp=sharing)
+
+<br>
+
+#### APSIM_Python 구성요소
+* met - 모델 입력자료 (기상자료)
+
+* run.apsim (APSIM Setting 파일)
+
+* run_apsim.exe (APSIM Python 실행 파일)
+
+<br>
+
+#### met 폴더
+
+met 파일이란 APSIM 모델을 시뮬레이션을 위한 사이트 정보와 기상자료를 모델에서 요구하는 형식에 맞추어 정리된 파일이다. 
+
+
+![met 폴더](https://github.com/EthanSeok/APSIM_Python/assets/93086581/7a39cf99-36c1-4e10-b78d-b7a3c1d2e41c)
+
+
+![met 파일 예시](https://github.com/EthanSeok/APSIM_Python/assets/93086581/710e762c-2c91-43b4-b522-a5d014f17244)
+
+<br>
+
+#### run.apsim
+
+run.apsim 파일은 APSIM 시뮬레이션 config 파일이라 이해하면 된다. 각종 시뮬레이션 옵션을 컨트롤 하는 중요한 파일이다. APSIM 파일의 구성 요소와 
+적용방법은 추후에 정리할 예정이다.
+
+![apsim 파일 예시](https://github.com/EthanSeok/APSIM_Python/assets/93086581/e4819538-2ee1-4219-93fd-2ceb11f128d2)
+
+<br>
+
+#### run_apsim.exe
+
+APSIM Python을 실행하는 파일이다. 실행시 GUI 인터페이스가 출력되며, APSIM 설치 경로와 apsim 파일 위치 그리고 시뮬레이션하고자 하는 날짜를 넣어주면 된다.
+
+<br>
+
+run_apsim.exe 실행시 다음과 같은 화면이 출력된다. 해당 화면은 met 폴더에 들어있는 파일들의 목록을 출력한다.
+
+![터미널](https://github.com/EthanSeok/APSIM_Python/assets/93086581/f6a24176-4a4d-4739-b8ff-759513683aa5)
+
+<br>
+
+run_apsim.exe 실행시 다음과 같은 GUI 인터페이스가 출력된다. 차례로 정보를 입력한 뒤에 `submit`을 클릭하여 실행하면 된다.
+
+![GUI](https://github.com/EthanSeok/APSIM_Python/assets/93086581/6ef89183-693e-49ac-872e-0dfc40a084c7)
+
+<br>
+
+정상적으로 실행 되면 다음과 같이 output이 출력되고, 시뮬레이션 완료시 팝업이 출력된다. 팝업은 일정시간이 지나면 자동으로 없어지니 별다른 클릭을 하지 않아도 된다.
+
+![실행 화면](https://github.com/EthanSeok/APSIM_Python/assets/93086581/5c697d67-81ad-4a1d-b4dc-9e12bcadf2c4)
+
+<br>
+
+정상적으로 실행 시 여러 사이트를 다음과 같이 한번에 시뮬레이션할 수 있다는 것이 장점이다.
+
+![image](https://github.com/EthanSeok/APSIM_Python/assets/93086581/f23f3e22-9679-41a3-b2ca-67c022f862d3)
+
+<br>
+
+시뮬레이션 진행 시 다음과 같이 시뮬레이션 과정을 정리해준 파일인 summary (.sum) 파일과 결과 파일인 .out 파일이 생성된다.
+![image](https://github.com/EthanSeok/APSIM_Python/assets/93086581/6dde7333-59f2-49fd-8786-7e259361e467)
+
+<br>
+
+시뮬레이션 종료시 `cancle`을 클릭하면 GUI가 종료되고, .sum 파일과 .out 파일이 각 이름의 폴더가 새롭게 생성되고 자동으로 정리된다.
+
+![GUI](https://github.com/EthanSeok/APSIM_Python/assets/93086581/6ef89183-693e-49ac-872e-0dfc40a084c7)
