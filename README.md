@@ -36,6 +36,9 @@ N 및 P 변환, 토양 pH, 침식 및 모든 범위의 관리 제어 가능.
 
 [여기에서 설치](https://drive.google.com/file/d/1umtgLz-Ka9PkoTwLDwIsJBmdkmGTe1tT/view?usp=sharing)
 
+다운 받은 파일의 압축을 풀면 생성되는 `APSIM_Python` 폴더를 **반드시  C 드라이브 root에 설치해야 한다. 절대 경로는 C:\ 이다.
+C드라이브 root에 설치하지 않으면 실행시 오류가 발생하므로 주의하자.**
+
 <br>
 
 #### APSIM_Python 구성요소
