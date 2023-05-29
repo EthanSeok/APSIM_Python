@@ -1,104 +1,91 @@
-# -*- coding: utf-8 -*-
-
-import os,subprocess
+import os
+import subprocess
 import shutil
 import xml.etree.ElementTree as ET
 import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
-from scipy import stats
-from sklearn.metrics import mean_squared_error
+import PySimpleGUI as sg
 
 
+def run(met_list, s_date, e_date, apsim_file, output_element):
+    inpath = 'C:/APSIM_Python/'
+    os.chdir(inpath)
 
-out_list = []
+    '''apsim 파일 불러오기'''
+    wheat_tree = ET.parse(apsim_file)
+    root = wheat_tree.getroot()
 
-'''met 파일 불러오기'''
-met_list = [f'C:\code\Apsim_2023\met\{x}'  for x in os.listdir("met/") if x.endswith(".txt")]
-print('met 리스트 : \n', met_list)
+    '''run.apsim 파일 내 met 경로 변경'''
+    for i in range(len(met_list)):
+        for node in root.iter('simulation'):
+            node.attrib['name'] = met_list[i][20:-4]
 
+            for metfile in node.iter('filename'):
+                metfile.text = met_list[i]
 
-inpath = 'C:/code/Apsim_2023/'
-os.chdir(inpath)
+            for s_clock in node.iter('start_date'):
+                s_clock.text = s_date
 
-'''apsim 파일 불러오기'''
-wheat_tree = ET.parse('run.apsim')
-root = wheat_tree.getroot()
+            for e_clock in node.iter('end_date'):
+                e_clock.text = e_date
 
-'''run.apsim 파일 내 met 경로 변경'''
-for i in range(len(met_list)):
-    for node in root.iter('simulation'):
-        node.attrib['name'] = met_list[i][23:-4]
+        wheat_tree.write(apsim_file)  # apsim 파일 덮어 씌우기
+        apsim_exe = f'C:/Program Files (x86)/APSIM710-r4218/Model/Apsim.exe "{apsim_file}"'  # apsim exe 경로 및 apsim 파일 선언
+        subprocess.run(apsim_exe, stdout=open(os.devnull, 'wb'))  # apsim 파일 실행
 
-        for metfile in node.iter('filename'):
-            metfile.text = met_list[i]
-
-    wheat_tree.write('run.apsim')                                                           # apsim 파일 덮어 씌우기
-    apsim_exe = 'C:/Program Files (x86)/APSIM710-r4218/Model/Apsim.exe "run.apsim"'         # apsim exe 경로 및 apsim 파일 선언
-    subprocess.run(apsim_exe, stdout=open(os.devnull, 'wb'))                                # apsim 파일 실행
-
-    '''결과 파일 불러오기'''
-    out_list = met_list[i][23:-4]
-    out_file = pd.read_csv(f'C:/code/Apsim_2023/{out_list}.out',sep="\\s+" ,skiprows=[0, 1, 3],parse_dates=['Date'], infer_datetime_format=True)
-    out_file['year'] = out_file['Date'].dt.year
-    observation = pd.read_csv(f'C:/code/Apsim_2023/kosis/{out_list}.csv')
-
-    # print(out_file)
-
-    '''결과 파일 후처리'''
-    kosis = observation[observation['item'] == '단위생산량']
-    kosis = kosis.drop(columns=['lo1', 'lo2', 'lo3', 'item'])
-    pred = out_file.drop(columns=['Date', 'biomass','grain_size','grain_protein', 'esw'])
-    pred['yield']= pred['yield'] * 0.1
-    pred = pred[pred['year'].isin(kosis['year'])]
-
-    kosis = kosis.groupby(kosis['year'])['value'].mean()
-
-    results = pd.merge(kosis, pred,how='inner', on='year')
-    results = results.rename(columns={'value':'kosis_results', 'yield':'pred_results'})
-    print(out_list)
-    print(results)
-
-    '''생산량 그래프 그리기'''
-    if len(results['year']) != 1:
-        index = np.arange(len(results["year"]))
-        plt.figure(figsize=(15, 10))
-        plt.barh(index, results['pred_results'])
-        plt.title(f'{out_list} yield', fontsize=15)
-        plt.xlabel('yield (kg/10a)', fontsize=15)
-        plt.ylabel('Year', fontsize=15)
-        plt.yticks(index, results["year"], fontsize=15)
-        plt.savefig(f'C:/code/Apsim_2023/graph/bar/{out_list}.png')
-        plt.close()
+        '''결과 파일 불러오기'''
+        out_list = met_list[i][20:-4]
+        out_file = pd.read_csv(f'C:/APSIM_Python/{out_list}.out', sep="\\s+", skiprows=[0, 1, 3], parse_dates=['Date'],
+                               infer_datetime_format=True)
+        output_element.print(out_list)
+        output_element.print(f'{out_file} \n')
+        output_element.update()  # Update the GUI window to display the printed output
+        sg.popup_auto_close(f'{out_list} simulation completed.')
 
 
-        '''모델 결과 비교 그래프'''
-        y_pred = results['pred_results']
-        obs = results['kosis_results']
-        r, p = stats.pearsonr(obs, y_pred)
-        rmse = np.sqrt(mean_squared_error(obs, y_pred))
-        filename = f'C:/code/Apsim_2023/graph/scatter/ {out_list},  {r ** 2:.4f}, RMSE {rmse:.4f}.png'
+def main():
+    '''met 파일 불러오기'''
+    met_list = [f'C:\APSIM_Python\met\{x}' for x in os.listdir("met/") if x.endswith(".txt")]
+    print('met 리스트 : \n', met_list)
 
-        print(f'\n R2 {r ** 2:.4f}, ', end="")
-        print(f'RMSE {rmse:.4f}')
+    sg.theme('SandyBeach')
 
-        fig, ax = plt.subplots(figsize=(5, 5), constrained_layout=True)
-        sns.regplot(x="pred_results", y="kosis_results", data=results, ax=ax,scatter_kws={"fc":"b", "ec":"b", "s":100, "alpha":0.3})
-        fig.savefig (filename)
+    layout = [
+        [sg.Text('APSIM 설치 경로'), sg.InputText('C:/Program Files (x86)/APSIM710-r4218/Model/Apsim.exe "run.apsim"')],
+        [sg.Text('APSIM 실행 파일'), sg.InputText('run.apsim')],
+        [sg.Text('시뮬레이션 시작 날짜 (format: dd/mm/yyyy)'), sg.InputText('01/01/2007')],
+        [sg.Text('시뮬레이션 종료 날짜 (format: dd/mm/yyyy)'), sg.InputText('31/12/2008')],
+        [sg.Submit(), sg.Cancel()],
+        [sg.Output(size=(80, 20), key='output')]  # Output element for displaying the printed output
+    ]
 
-    else:
-        print(out_list)
-        # pass
+    window = sg.Window('APSIM Python', layout, return_keyboard_events=True)
+
+    while True:
+        event, values = window.read()
+
+        if event == sg.WINDOW_CLOSED or event == 'Cancel':
+            break
+
+        if event == 'Submit':
+            apsim_file = values[1]
+            s_date = values[2]
+            e_date = values[3]
+            window['output'].update('')
+            run(met_list, s_date, e_date, apsim_file,window['output'])
+
+    window.close()
+
+
 ###########################################################################################################################################
 # 폴더 정리
 
 """폴더선택"""
-dir_path = 'C:\code\Apsim_2023'
+dir_path = 'C:\APSIM_Python'
 
 """폴더내파일검사"""
 
 global_cache = {}
+
 
 def cached_listdir(path):
     res = global_cache.get(path)
@@ -127,7 +114,7 @@ def moveFile(ext):
 
 
 if __name__ == '__main__':
-
+    main()
     cached_listdir(dir_path)
 
     for item in global_cache[dir_path]:
